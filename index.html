@@ -42,7 +42,7 @@
     width:min(96vw, 720px);
     height:min(94vh, 900px);
     height:min(94dvh, 900px);
-    background: rgba(10,0,20,0.88);
+    background: rgba(10,0,20,0.9);
     border:2px solid #00ffea;
     border-radius:20px;
     padding:20px;
@@ -68,7 +68,6 @@
   .screen > div[id$="Screen"] { flex:1; display:none; flex-direction:column; min-height:0; overflow:hidden; }
   .screen > div.active { display:flex; }
 
-  /* === КАРТА === */
   #mapScreen { position:relative; }
   .map {
     flex:1; position:relative;
@@ -123,7 +122,6 @@
   }
   .map-score b { color:#00ffea; font-size:16px; }
 
-  /* === ДИАЛОГ / ВОПРОС === */
   #dialogScreen {
     justify-content:flex-end;
     position:relative;
@@ -138,7 +136,6 @@
     background-position:center;
     background-repeat:no-repeat;
     z-index: 0;
-    transition: background-image 0.3s;
   }
   
   .dialog-overlay {
@@ -150,7 +147,7 @@
 
   .dialog-box {
     position:relative; z-index: 2;
-    background:rgba(0,0,0,0.88);
+    background:rgba(0,0,0,0.9);
     border:2px solid #ff2e88;
     border-radius:14px;
     padding:16px;
@@ -210,7 +207,6 @@
   .next-btn.show { display:block; }
   .next-btn:active { transform:scale(.97); }
 
-  /* === ИГРА: БОЛТЫ (С ШИНОЙ) === */
   .game-head { display:flex; justify-content:space-between; color:#fff; font-size:13px; margin-bottom:10px; flex-shrink:0; }
   .game-head b { color:#00ffea; }
 
@@ -221,16 +217,15 @@
   }
   
   .wheel {
-    width:min(320px, 65vmin); height:min(320px, 65vmin); border-radius:50%;
+    width:min(320px, 75vmin); height:min(320px, 75vmin); border-radius:50%;
     background-image: url('tire.png');
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
     background-color: #111;
-    border:8px solid #1c1c1c;
+    border:12px solid #1c1c1c;
     box-shadow:0 0 30px rgba(0,255,234,0.5), inset 0 0 30px rgba(0,0,0,0.9);
     position:relative; transition: transform .15s;
-    display: flex; align-items: center; justify-content: center;
   }
 
   .wheel.hit { transform:scale(1.04); box-shadow:0 0 55px #ff2e88, inset 0 0 30px rgba(255,46,136,.5); }
@@ -238,19 +233,20 @@
   @keyframes shake { 25%{transform:translateX(6px)} 50%{transform:translateX(-6px)} 75%{transform:translateX(4px)} }
 
   .bolt {
-    position:absolute; width:40px; height:40px; border-radius:50%;
+    position:absolute; width:44px; height:44px; border-radius:50%;
     background: radial-gradient(circle at 35% 35%, #888, #333);
     border:2px solid #555; cursor:pointer;
     display:flex; align-items:center; justify-content:center;
     font-size:14px; color:#0a0014; font-weight:900;
     box-shadow:0 0 10px rgba(0,255,234,0.4);
     transition: transform .1s, box-shadow .2s, background .2s; z-index:3;
-    margin:-20px 0 0 -20px;
+    transform: translate(-50%, -50%);
+    margin: 0;
   }
   .bolt::before { content:''; position:absolute; inset:6px; border-radius:50%; border:2px solid #222; }
   .bolt.active { animation: boltPulse 0.6s infinite; background: radial-gradient(circle at 35% 35%, #00ffea, #008888); box-shadow:0 0 25px #00ffea; }
   @keyframes boltPulse { 50%{ box-shadow:0 0 35px #00ffea, 0 0 15px #fff; } }
-  .bolt.done { background: radial-gradient(circle at 35% 35%, #00ffea, #004444); box-shadow:0 0 20px #00ffea; animation:none; cursor:default; transform:scale(1.05); }
+  .bolt.done { background: radial-gradient(circle at 35% 35%, #00ffea, #004444); box-shadow:0 0 20px #00ffea; animation:none; cursor:default; transform: translate(-50%, -50%) scale(1.1); }
   .bolt.done::after { content:'✓'; position:absolute; color:#0a0014; font-size:18px; font-weight:900; animation: pop .3s; }
   @keyframes pop { 0%{transform:scale(0)} 100%{transform:scale(1)} }
   .bolt.bad { animation: shake .3s; border-color:#ff2e88; }
@@ -262,7 +258,6 @@
   .timer-bar { height:8px; background:rgba(255,255,255,0.1); border-radius:4px; overflow:hidden; margin-bottom:10px; flex-shrink:0; }
   .timer-fill { height:100%; width:100%; background:linear-gradient(90deg,#00ffea,#ffb347,#ff2e88); transition: width .1s linear; }
 
-  /* === ГЕРОЙ НА СТАРТЕ === */
   .intro-hero {
     width:180px; height:180px; border-radius:50%; overflow:hidden;
     border:4px solid #00ffea;
@@ -277,7 +272,6 @@
   .intro-hero.error img { display:none; }
   .intro-hero.error .fallback { display:block; }
 
-  /* === АДАПТИВ ПОД ТЕЛЕФОН === */
   @media (max-width: 520px) {
     body { padding:6px; }
     .screen {
@@ -305,7 +299,7 @@
     .intro-hero { width:140px; height:140px; }
     .intro-hero .fallback { font-size:60px; }
 
-    .bolt { width:34px; height:34px; margin:-17px 0 0 -17px; }
+    .bolt { width:36px; height:36px; }
     .bolt::before { inset:5px; }
   }
 
@@ -328,11 +322,9 @@
   <div class="logo">VICE TIRES</div>
   <div class="subtitle">АВТО-КВЕСТ • GISLAVED</div>
 
-  <!-- ЭКРАН 0: ПРЕДИСТОРИЯ -->
   <div id="introScreen" class="active">
     <div style="flex:1; display:flex; flex-direction:column; justify-content:center; align-items:center; text-align:center; color:#fff; overflow:auto;">
       <div class="intro-hero" id="introHeroBox">
-        <!-- Жестко прописан правильный путь -->
         <img src="mainhero.jpg" alt="Главный герой" onerror="this.parentElement.classList.add('error')">
         <span class="fallback">🚗</span>
       </div>
@@ -351,7 +343,6 @@
     </div>
   </div>
 
-  <!-- ЭКРАН 1: КАРТА -->
   <div id="mapScreen">
     <div class="map-score">
       Найдено ответов: <b id="scoreMap">0</b> / 4
@@ -405,7 +396,6 @@
     <div class="map-hint" id="mapHint">▸ Посети все точки и ответь на вопросы</div>
   </div>
 
-  <!-- ЭКРАН 2: ДИАЛОГ / ВОПРОС -->
   <div id="dialogScreen">
     <div class="dialog-bg-layer" id="dialogBgLayer"></div>
     <div class="dialog-overlay"></div>
@@ -426,7 +416,6 @@
     </div>
   </div>
 
-  <!-- ЭКРАН 3: ИГРА -->
   <div id="gameScreen">
     <div class="game-head">
       <div>Болты: <b id="boltCounter">0/5</b></div>
@@ -441,11 +430,7 @@
 </div>
 
 <script>
-/* =======================================================
-   НАСТРОЙКА КАРТИНОК (ЖЕСТКО ПРОПИСАНЫ ПРАВИЛЬНЫЕ ПУТИ)
-   ======================================================= */
 const IMAGES = {
-  intro: 'mainhero.jpg',
   police: 'police.jpg',
   shop: 'store.jpg',
   park: 'park.jpg',
@@ -462,20 +447,15 @@ const BACKGROUNDS = {
   tire:    'fonservice.jpg'
 };
 
-// Фон меняется моментально
 function setDialogBackground(loc) {
   const layer = document.getElementById('dialogBgLayer');
-  const bg = BACKGROUNDS[loc];
-  if (bg) {
-    layer.style.backgroundImage = `url('${bg}')`;
+  if (BACKGROUNDS[loc]) {
+    layer.style.backgroundImage = `url('${BACKGROUNDS[loc]}')`;
   } else {
     layer.style.backgroundImage = 'none';
   }
 }
 
-/* =======================================================
-   ЛОГИКА
-   ======================================================= */
 const questionsDB = {
   police: [
     { q: "Дружище, какой знак предупреждает о скользкой дороге?", a: ["Знак с машиной и волнами", "Знак с вопросительным знаком", "Знак с пешеходом"], correct: 0, good: "О, точно! Вижу, ты внимательный водитель. Уважаю!", bad: "Эх, нет. Это знак с машиной и волнами. Будь осторожнее на дороге, дружище." },
