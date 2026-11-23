@@ -140,7 +140,6 @@
     z-index: 0;
   }
   
-  /* Затемнение фона */
   .dialog-overlay {
     position:absolute; inset:0;
     background: linear-gradient(180deg, rgba(10,0,20,0.4) 0%, rgba(10,0,20,0.85) 60%, rgba(10,0,20,0.95) 100%);
@@ -220,10 +219,9 @@
     min-height:0;
   }
   
-  /* Колесо с шиной tire.png */
   .wheel {
     width:min(320px, 65vmin); height:min(320px, 65vmin); border-radius:50%;
-    background-image: url('tire.png'); /* ФОН КОЛЕСА - ШИНА */
+    background-image: url('tire.png');
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
@@ -234,7 +232,6 @@
     display: flex; align-items: center; justify-content: center;
   }
   
-  /* Запасной вариант колеса (если шина не загрузится) */
   .wheel.no-img {
     background-image: none;
     background: radial-gradient(circle at 50% 50%, #222 28%, #111 60%, #000 100%);
@@ -284,6 +281,16 @@
   .intro-hero.error img { display:none; }
   .intro-hero.error .fallback { display:block; }
 
+  /* Отладочная панель */
+  #debug-panel {
+    position: fixed; bottom: 0; left: 0; right: 0;
+    background: #000; color: #0f0; font-size: 11px;
+    padding: 6px 10px; display: flex; gap: 15px; flex-wrap: wrap;
+    z-index: 9999; font-family: monospace; border-top: 2px solid #00ffea;
+  }
+  .dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; background: #f00; margin-right: 4px; vertical-align: middle;}
+  .dot.ok { background: #0f0; }
+
   /* === АДАПТИВ ПОД ТЕЛЕФОН === */
   @media (max-width: 520px) {
     body { padding:6px; }
@@ -297,34 +304,19 @@
     }
     .logo { font-size:22px; }
     .subtitle { font-size:9px; margin-bottom:10px; }
-
     .portrait { width:80px; height:80px; font-size:36px; border-width:2px; }
     .dialog-box { padding:12px; gap:10px; }
     .text { font-size:13px; }
     .option-btn { font-size:12px; padding:8px 10px; }
     .next-btn { font-size:12px; padding:8px 16px; }
-
     .pin { width:44px; height:44px; }
     .pin-pulse { width:44px; height:44px; }
     .pin-label { font-size:11px; }
-
     .tire-showcase { height:130px; }
     .intro-hero { width:140px; height:140px; }
     .intro-hero .fallback { font-size:60px; }
-
     .bolt { width:34px; height:34px; margin:-17px 0 0 -17px; }
     .bolt::before { inset:5px; }
-  }
-
-  @media (max-height: 640px) {
-    .screen { padding:12px; }
-    .logo { font-size:20px; }
-    .subtitle { margin-bottom:8px; }
-    .intro-hero { width:120px; height:120px; margin-bottom:10px; }
-    .intro-hero .fallback { font-size:50px; }
-    .tire-showcase { height:110px; }
-    .portrait { width:70px; height:70px; font-size:30px; }
-    .text { font-size:12px; line-height:1.35; }
   }
 </style>
 </head>
@@ -446,9 +438,39 @@
   </div>
 </div>
 
+<!-- Отладочная панель -->
+<div id="debug-panel">
+  <span><span class="dot" id="dot-hero"></span>Герой</span>
+  <span><span class="dot" id="dot-store"></span>Магазин</span>
+  <span><span class="dot" id="dot-park"></span>Парк</span>
+  <span><span class="dot" id="dot-gas"></span>Заправка</span>
+  <span><span class="dot" id="dot-police"></span>Полиция</span>
+  <span><span class="dot" id="dot-service"></span>Сервис</span>
+  <span><span class="dot" id="dot-tire"></span>Шина</span>
+</div>
+
 <script>
 /* =======================================================
-   НАСТРОЙКА КАРТИНОК
+   ПРОВЕРКА КАРТИНОК (ОТЛАДКА)
+   ======================================================= */
+function checkImg(url, dotId) {
+  const img = new Image();
+  const dot = document.getElementById(dotId);
+  img.onload = () => { if(dot) dot.classList.add('ok'); };
+  img.onerror = () => { if(dot) dot.classList.remove('ok'); };
+  img.src = url;
+}
+
+checkImg('mainhero.jpg', 'dot-hero');
+checkImg('fonstore.jpg', 'dot-store');
+checkImg('fonpark.jpg', 'dot-park');
+checkImg('gas.jpg', 'dot-gas');
+checkImg('inpolice.jpg', 'dot-police');
+checkImg('fonservice.jpg', 'dot-service');
+checkImg('tire.png', 'dot-tire');
+
+/* =======================================================
+   ЛОГИКА ИГРЫ
    ======================================================= */
 const IMAGES = {
   intro: 'mainhero.jpg',
@@ -468,7 +490,6 @@ const BACKGROUNDS = {
   tire:    'fonservice.jpg'
 };
 
-/* 1. Герой */
 const heroImg = document.getElementById('introHeroImg');
 const heroBox = document.getElementById('introHeroBox');
 if (heroImg) {
@@ -479,7 +500,6 @@ if (heroImg) {
   }
 }
 
-/* 2. Проверка шины для колеса */
 const wheelEl = document.getElementById('wheel');
 const testTire = new Image();
 testTire.onerror = () => {
@@ -487,7 +507,6 @@ testTire.onerror = () => {
 };
 testTire.src = 'tire.png';
 
-/* 3. Установка фона */
 function setDialogBackground(loc) {
   const bg = BACKGROUNDS[loc];
   const layer = document.getElementById('dialogBgLayer');
@@ -497,7 +516,6 @@ function setDialogBackground(loc) {
     layer.style.backgroundImage = 'none';
   }
 }
-/* ======================================================= */
 
 const questionsDB = {
   police: [
@@ -932,3 +950,4 @@ updateMapUI();
 </script>
 </body>
 </html>
+
