@@ -138,11 +138,12 @@
     background-position:center;
     background-repeat:no-repeat;
     z-index: 0;
+    transition: background-image 0.3s;
   }
   
   .dialog-overlay {
     position:absolute; inset:0;
-    background: linear-gradient(180deg, rgba(10,0,20,0.4) 0%, rgba(10,0,20,0.85) 60%, rgba(10,0,20,0.95) 100%);
+    background: linear-gradient(180deg, rgba(10,0,20,0.3) 0%, rgba(10,0,20,0.85) 60%, rgba(10,0,20,0.95) 100%);
     z-index: 1;
     pointer-events:none;
   }
@@ -283,7 +284,7 @@
 
   /* Отладочная панель */
   #debug-panel {
-    position: fixed; bottom: 0; left: 0; right: 0;
+    position: fixed; bottom: 0; left: 0; right:0;
     background: #000; color: #0f0; font-size: 11px;
     padding: 6px 10px; display: flex; gap: 15px; flex-wrap: wrap;
     z-index: 9999; font-family: monospace; border-top: 2px solid #00ffea;
@@ -451,65 +452,98 @@
 
 <script>
 /* =======================================================
-   ПРОВЕРКА КАРТИНОК (ОТЛАДКА)
+   УМНАЯ ЗАГРУЗКА КАРТИНОК (Ищем .jpg, .JPG, .jpeg, .png)
    ======================================================= */
-function checkImg(url, dotId) {
-  const img = new Image();
-  const dot = document.getElementById(dotId);
-  img.onload = () => { if(dot) dot.classList.add('ok'); };
-  img.onerror = () => { if(dot) dot.classList.remove('ok'); };
-  img.src = url;
+// Хелпер: пробует разные расширения для файла
+function findImage(baseName, callback) {
+  const exts = ['.jpg', '.JPG', '.jpeg', '.JPEG', '.png', '.PNG', '.webp', '.WEBP'];
+  let found = false;
+  
+  // Если в имени уже есть точка, просто проверяем как есть
+  if (baseName.includes('.')) {
+    const img = new Image();
+    img.onload = () => { if (!found) { found = true; callback(baseName); } };
+    img.onerror = () => { if (!found) { found = true; callback(null); } };
+    img.src = baseName;
+    return;
+  }
+
+  // Иначе перебираем расширения
+  let currentIndex = 0;
+  function tryNext() {
+    if (currentIndex >= exts.length) {
+      if (!found) { found = true; callback(null); }
+      return;
+    }
+    const url = baseName + exts[currentIndex];
+    const img = new Image();
+    img.onload = () => { if (!found) { found = true; callback(url); } };
+    img.onerror = () => { currentIndex++; tryNext(); };
+    img.src = url;
+  }
+  tryNext();
 }
 
-checkImg('mainhero.jpg', 'dot-hero');
-checkImg('fonstore.jpg', 'dot-store');
-checkImg('fonpark.jpg', 'dot-park');
-checkImg('gas.jpg', 'dot-gas');
-checkImg('inpolice.jpg', 'dot-police');
-checkImg('fonservice.jpg', 'dot-service');
-checkImg('tire.png', 'dot-tire');
+// Панель отладки
+function setDebugDot(id, success) {
+  const dot = document.getElementById(id);
+  if (dot) {
+    if (success) dot.classList.add('ok');
+    else dot.classList.remove('ok');
+  }
+}
+
+// Ищем все файлы
+findImage('mainhero', (url) => { 
+  setDebugDot('dot-hero', !!url); 
+  if (url) document.getElementById('introHeroImg').src = url;
+  else document.getElementById('introHeroBox').classList.add('error');
+});
+
+findImage('fonstore', (url) => { setDebugDot('dot-store', !!url); });
+findImage('fonpark', (url) => { setDebugDot('dot-park', !!url); });
+findImage('gas', (url) => { setDebugDot('dot-gas', !!url); });
+findImage('inpolice', (url) => { setDebugDot('dot-police', !!url); });
+findImage('fonservice', (url) => { setDebugDot('dot-service', !!url); });
+findImage('tire', (url) => { 
+  setDebugDot('dot-tire', !!url); 
+  if (!url) document.getElementById('wheel').classList.add('no-img');
+  else document.getElementById('wheel').style.backgroundImage = `url('${url}')`;
+});
 
 /* =======================================================
-   ЛОГИКА ИГРЫ
+   ЛОГИКА
    ======================================================= */
 const IMAGES = {
-  intro: 'mainhero.jpg',
+  intro: 'mainhero', 
   police: 'police.jpg',
   shop: 'store.jpg',
   park: 'park.jpg',
   gas: 'azc.jpg',
   mechanic: 'service.jpg',
-  driver: 'mainhero.jpg'
+  driver: 'mainhero'
 };
 
 const BACKGROUNDS = {
-  police:  'inpolice.jpg',
-  shop:    'fonstore.jpg',
-  park:    'fonpark.jpg',
-  gas:     'gas.jpg',
-  tire:    'fonservice.jpg'
+  police:  'inpolice',
+  shop:    'fonstore',
+  park:    'fonpark',
+  gas:     'gas',
+  tire:    'fonservice'
 };
 
-const heroImg = document.getElementById('introHeroImg');
-const heroBox = document.getElementById('introHeroBox');
-if (heroImg) {
-  heroImg.onload = () => { heroBox.classList.remove('error'); };
-  heroImg.onerror = () => { heroBox.classList.add('error'); };
-  if (heroImg.complete && heroImg.naturalWidth === 0) {
-    heroBox.classList.add('error');
-  }
-}
+const backgroundUrls = {};
 
-const wheelEl = document.getElementById('wheel');
-const testTire = new Image();
-testTire.onerror = () => {
-  wheelEl.classList.add('no-img');
-};
-testTire.src = 'tire.png';
+// Предзагружаем фоны
+Object.entries(BACKGROUNDS).forEach(([key, base]) => {
+  findImage(base, (url) => {
+    if (url) backgroundUrls[key] = url;
+  });
+});
 
 function setDialogBackground(loc) {
-  const bg = BACKGROUNDS[loc];
   const layer = document.getElementById('dialogBgLayer');
+  const bg = backgroundUrls[loc];
   if (bg) {
     layer.style.backgroundImage = `url('${bg}')`;
   } else {
@@ -781,6 +815,7 @@ nextBtn.addEventListener('click', () => {
   }
 });
 
+const wheelEl = document.getElementById('wheel');
 const boltCounterEl = document.getElementById('boltCounter');
 const missCounterEl = document.getElementById('missCounter');
 const gameFeedback = document.getElementById('gameFeedback');
@@ -950,4 +985,5 @@ updateMapUI();
 </script>
 </body>
 </html>
+
 
